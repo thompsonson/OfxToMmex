@@ -11,18 +11,8 @@ namespace OfxToMmexConsoleApp
 {
     class Program
     {
-        static void Main(string[] args)
+        private static void ImportOfxToMmex(OFXDocument OfxDocument)
         {
-            Console.WriteLine("Into Main");
-
-            OFXDocumentParser doc = new OFXDocumentParser();
-
-            OFXDocument OfxDocument = new OFXDocument();
-
-            OfxDocument = doc.Import(new FileStream("D:\\Barclays.qbo", FileMode.Open));
-            //OfxDocument = doc.Import(new FileStream("D:\\amex.qfx", FileMode.Open));// 
-
-            Console.WriteLine("File imported");
 
             // Create a PetaPoco database object
             var db = new PetaPoco.Database("mmex_db");
@@ -111,7 +101,7 @@ namespace OfxToMmexConsoleApp
                         {
                             newTrans.TRANSCODE = "Withdrawal";
                         }
-                        newTrans.TRANSAMOUNT = Math.Abs( trans.Amount);
+                        newTrans.TRANSAMOUNT = Math.Abs(trans.Amount);
                         newTrans.STATUS = "F";
                         newTrans.NOTES = trans.Name;
                         newTrans.CATEGID = payee.CATEGID;
@@ -130,16 +120,84 @@ namespace OfxToMmexConsoleApp
                 }
 
             }
-
-            Console.WriteLine("-------------------------------------------------------------------------");
-
             // Show all Accounts    
             foreach (var a in db.Query<Accounts>("SELECT * FROM ACCOUNTLIST_V1;"))
             {
                 Console.WriteLine("{0} - {1} - {2}", a.ACCOUNTID, a.ACCOUNTNUM, a.ACCOUNTNAME);
             }
 
+        }
+
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Into Main");
+            //create a filesystemwatcher class instance for monitoring a physical file system directory
+            FileSystemWatcher watcher = new FileSystemWatcher();
+            watcher.Created += new FileSystemEventHandler(watcher_Created);
+            //provide a path to instance for monitoring
+            watcher.Path = @"c:\temp\";
+            //start the monitor
+            watcher.EnableRaisingEvents = true;
+            
+
+            Console.WriteLine("-------------------------------------------------------------------------");
+
+
+
             Console.ReadLine();
+        }
+
+        private static void watcher_Created(object source, FileSystemEventArgs e)
+        {
+            var db = new PetaPoco.Database("mmex_db");
+            //fullpath
+            Console.WriteLine("-------------------------------------------------------------------------");
+            Console.WriteLine("Importing file: " + e.FullPath);
+            Workflow wf = new Workflow();
+            wf.filename = e.FullPath;
+            wf.WatcherCreateTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            db.Insert(wf);
+            // need to wait for file to be copied in
+            while (creationComplete(e.FullPath) == false)
+            {
+                // need to timeout here...
+                
+            }
+            // workflow
+            /*
+             *  
+             * */
+            wf.ImportStartTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            db.Update(wf);
+            OFXDocumentParser doc = new OFXDocumentParser();
+            OFXDocument OfxDocument = new OFXDocument();
+            OfxDocument = doc.Import(new FileStream(e.FullPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None));
+            Console.WriteLine("File has been read");
+            wf.ProcessStartTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            wf.DBInsertStartTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            db.Update(wf);
+            OfxToMmexConsoleApp.Program.ImportOfxToMmex(OfxDocument);
+            wf.FinishTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            db.Update(wf);
+            Console.WriteLine("Import to Money Manager EX DB complete");
+            Console.WriteLine("-------------------------------------------------------------------------");
+        }
+
+        private static bool creationComplete(string fileName)
+        {
+            // if the file can be opened it is no longer locked and now available
+            try
+            {
+                using (FileStream inputStream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    return true;
+                }
+            }
+            catch (IOException)
+            {
+                return false;
+            }
         }
     }
 }

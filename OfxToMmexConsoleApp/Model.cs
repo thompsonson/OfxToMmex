@@ -66,15 +66,40 @@ namespace OfxToMmexConsoleApp
         [PetaPoco.Column] public string FITID { get; set; }
         
     }
-    
+
     [PetaPoco.TableName("PAYEE_V1")]
     [PetaPoco.PrimaryKey("PAYEEID")]
     [PetaPoco.ExplicitColumns]
-    public class Payee 
+    public class Payee
     {
         [PetaPoco.Column] public int PAYEEID { get; set; }
         [PetaPoco.Column] public string PAYEENAME { get; set; }
         [PetaPoco.Column] public int CATEGID { get; set; }
         [PetaPoco.Column] public int SUBCATEGID { get; set; }
+    }
+
+    [PetaPoco.TableName("OfxToMmexWorkflow")]
+    [PetaPoco.PrimaryKey("WorkflowID")]
+    [PetaPoco.ExplicitColumns]
+    public class Workflow
+    {
+        [PetaPoco.Column] 
+        public int WorkflowID { get; set; }
+        [PetaPoco.Column] 
+        public string filename { get; set; }
+        [PetaPoco.Column] 
+        public string Status { get; set; }
+        [PetaPoco.Column] 
+        public string WatcherCreateTS { get; set; }
+        [PetaPoco.Column]
+        public string ImportStartTS { get; set; }
+        [PetaPoco.Column]
+        public string ProcessStartTS { get; set; }
+        [PetaPoco.Column]
+        public string DBInsertStartTS { get; set; }
+        [PetaPoco.Column]
+        public string FinishTS { get; set; }
+        [PetaPoco.Column]
+        public string LogFile { get; set; }
     }
 }
