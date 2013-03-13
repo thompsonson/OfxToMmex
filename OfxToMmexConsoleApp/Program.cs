@@ -19,8 +19,8 @@ namespace OfxToMmexConsoleApp
 
             OFXDocument OfxDocument = new OFXDocument();
 
-            OfxDocument = doc.Import(new FileStream("D:\\Dropbox\\Projects\\myBank\\data\\20130311 - Barclays.qbo", FileMode.Open));
-            //OfxDocument = doc.Import(new FileStream("D:\\Amex.qfx", FileMode.Open));
+            OfxDocument = doc.Import(new FileStream("D:\\Barclays.qbo", FileMode.Open));
+            //OfxDocument = doc.Import(new FileStream("D:\\amex.qfx", FileMode.Open));// 
 
             Console.WriteLine("File imported");
 
@@ -55,7 +55,14 @@ namespace OfxToMmexConsoleApp
                     // create the account 
                     account = new Accounts();
                     account.ACCOUNTNUM = ofxstatment.Account.AccountID;
-                    account.ACCOUNTTYPE = ofxstatment.Account.AccountType.ToString(); // document.ACCTTYPE;
+                    if (ofxstatment.Account.AccountType == OFXSharp.AccountType.BANK)
+                    {
+                        account.ACCOUNTTYPE = "Checking"; // document.ACCTTYPE;
+                    }
+                    else
+                    {
+                        account.ACCOUNTTYPE = "Term"; // document.ACCTTYPE;
+                    }
                     account.ACCOUNTNAME = "Automated Import of account #" + ofxstatment.Account.AccountID;
                     account.STATUS = "Open";
                     account.HELDAT = "Bank ID - " + ofxstatment.Account.BankID;
@@ -96,13 +103,20 @@ namespace OfxToMmexConsoleApp
                         var newTrans = new Transactions();
                         newTrans.ACCOUNTID = account.ACCOUNTID;
                         newTrans.PAYEEID = payee.PAYEEID;
-                        newTrans.TRANSCODE = trans.TransType.ToString();
-                        newTrans.TRANSAMOUNT = trans.Amount;
+                        if (trans.Amount > 0)
+                        {
+                            newTrans.TRANSCODE = "Deposit";
+                        }
+                        else
+                        {
+                            newTrans.TRANSCODE = "Withdrawal";
+                        }
+                        newTrans.TRANSAMOUNT = Math.Abs( trans.Amount);
                         newTrans.STATUS = "F";
                         newTrans.NOTES = trans.Name;
                         newTrans.CATEGID = payee.CATEGID;
                         newTrans.SUBCATEGID = payee.SUBCATEGID;
-                        newTrans.TRANSDATE = trans.Date.ToString() ;
+                        newTrans.TRANSDATE = trans.Date.ToString("yyyy-MM-dd");
                         newTrans.FOLLOWUPID = -1;
                         newTrans.FITID = trans.TransactionID;
                         db.Insert(newTrans);
@@ -124,8 +138,6 @@ namespace OfxToMmexConsoleApp
             {
                 Console.WriteLine("{0} - {1} - {2}", a.ACCOUNTID, a.ACCOUNTNUM, a.ACCOUNTNAME);
             }
-
-
 
             Console.ReadLine();
         }
