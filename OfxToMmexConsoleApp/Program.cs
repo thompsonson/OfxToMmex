@@ -13,7 +13,15 @@ namespace OfxToMmexConsoleApp
 {
     class Program
     {
+
+        public static string RootPath { get; set; }
+        public static string MonitorPath { get; set; }
+        public static string ProcessingPath { get; set; }
+        public static string ProcessedPath { get; set; }
+        
         private static readonly ILog log = LogManager.GetLogger(typeof(Program));
+
+        private static string test { get; set; }
 
         private static void ImportOfxToMmex(OFXDocument OfxDocument)
         {
@@ -131,57 +139,100 @@ namespace OfxToMmexConsoleApp
 
         }
 
-
         static void Main(string[] args)
         {
             // Set up a simple configuration that logs on the console.
            // BasicConfigurator.Configure();
-            XmlConfigurator.Configure(new System.IO.FileInfo(args[0]));
+            try
+            {
+                string log4netConfigPath = System.Configuration.ConfigurationManager.AppSettings["log4net"];
+                //XmlConfigurator.Configure(new System.IO.FileInfo(args[0]));
+                XmlConfigurator.Configure(new System.IO.FileInfo(log4netConfigPath));
+            }
+            catch (Exception ex)
+            {
+                throw new OfxToMmexException("Failed to set up log4net", ex);
+            }
+            log.Info("log4net config loaded");
+            try
+            {
+                log.Info("Setting up folders and file system watcher");
+                //create a filesystemwatcher class instance for monitoring a physical file system directory
+                FileSystemWatcher watcher = new FileSystemWatcher();
+                watcher.Created += new FileSystemEventHandler(watcher_Created);
+                //provide a path to instance for monitoring
+                RootPath = System.Configuration.ConfigurationManager.AppSettings["RootPath"];
+                MonitorPath = System.IO.Path.Combine(RootPath, "Monitor");
+                ProcessingPath = System.IO.Path.Combine(RootPath, "Processing");
+                ProcessedPath = System.IO.Path.Combine(RootPath, "Processed");
+                // check the folder exists
+                if (!System.IO.File.Exists(RootPath))
+                    System.IO.Directory.CreateDirectory(RootPath);
+                if (!System.IO.File.Exists(MonitorPath))
+                    System.IO.Directory.CreateDirectory(MonitorPath);
+                if (!System.IO.File.Exists(ProcessingPath))
+                    System.IO.Directory.CreateDirectory(ProcessingPath);
+                if (!System.IO.File.Exists(ProcessedPath))
+                    System.IO.Directory.CreateDirectory(ProcessedPath);
+                watcher.Path = MonitorPath;
+                //start the monitor
+                watcher.EnableRaisingEvents = true;
 
-            log.Info("Into Main");
-            //create a filesystemwatcher class instance for monitoring a physical file system directory
-            FileSystemWatcher watcher = new FileSystemWatcher();
-            watcher.Created += new FileSystemEventHandler(watcher_Created);
-            //provide a path to instance for monitoring
-            watcher.Path = @"c:\temp\";
-            //start the monitor
-            watcher.EnableRaisingEvents = true;
+            }
+            catch (Exception ex)
+            {
+                log.Fatal("Failed to set up the folders and file system watcher");
+                throw new OfxToMmexException("Failed to set up the folders and file system watcher", ex);
+            }
+            log.Info("Config loaded, watching folder ("+ MonitorPath + ")... hit enter to quit");
             
-            log.Info("-------------------------------------------------------------------------");
-
             Console.ReadLine();
         }
 
         private static void watcher_Created(object source, FileSystemEventArgs e)
         {
-            var db = new PetaPoco.Database("mmex_db");
-            //fullpath
-            log.Info("-------------------------------------------------------------------------");
-            log.Info("Importing file: " + e.FullPath);
-            Workflow wf = new Workflow();
-            wf.filename = e.FullPath;
-            wf.WatcherCreateTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            db.Insert(wf);
-            // need to wait for file to be copied in
-            while (creationComplete(e.FullPath) == false)
+            try
             {
-                // need to timeout here...
-                
+                var db = new PetaPoco.Database("mmex_db");
+                //fullpath
+                log.Info("Importing file: " + e.FullPath);
+                Workflow wf = new Workflow();
+                wf.filename = e.FullPath;
+                wf.WatcherCreateTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                db.Insert(wf);
+                // need to wait for file to be copied in
+                while (creationComplete(e.FullPath) == false)
+                {
+                    // need to timeout here...
+
+                }
+                wf.ProcessStartTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                //copy the file
+                string ProcessingFilePath = ProcessingPath + "\\" + "wfID." + wf.WorkflowID + "." + DateTime.Now.ToString("yyyyMMddHHmmss.") + e.Name;
+                log.Debug("ProcessingfilePath = " + ProcessingFilePath);
+                File.Move(e.FullPath, ProcessingFilePath);
+                wf.ImportStartTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                db.Update(wf);
+                OFXDocumentParser doc = new OFXDocumentParser();
+                OFXDocument OfxDocument = new OFXDocument();
+                OfxDocument = doc.Import(new FileStream(ProcessingFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None));
+                log.Info("File has been read");
+                wf.DBInsertStartTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                db.Update(wf);
+                OfxToMmexConsoleApp.Program.ImportOfxToMmex(OfxDocument);
+                // move the file to processed folder
+                string ProcessedFilePath = ProcessedPath + "\\" + "wfID." + wf.WorkflowID + "." + DateTime.Now.ToString("yyyyMMddHHmmss.") + e.Name;
+                File.Move(ProcessingFilePath, ProcessedFilePath);
+                wf.filename = ProcessingFilePath;
+                wf.FinishTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                db.Update(wf);
+                log.Info("Import to Money Manager EX DB complete");
             }
-            wf.ImportStartTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            db.Update(wf);
-            OFXDocumentParser doc = new OFXDocumentParser();
-            OFXDocument OfxDocument = new OFXDocument();
-            OfxDocument = doc.Import(new FileStream(e.FullPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None));
-            log.Info("File has been read");
-            wf.ProcessStartTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            wf.DBInsertStartTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            db.Update(wf);
-            OfxToMmexConsoleApp.Program.ImportOfxToMmex(OfxDocument);
-            wf.FinishTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            db.Update(wf);
-            log.Info("Import to Money Manager EX DB complete");
-            log.Info("-------------------------------------------------------------------------");
+            catch (Exception ex)
+            {
+                log.Fatal("Failed whilst processing the file");
+                throw new OfxToMmexException("Failed whilst processing the file", ex);
+            }
         }
 
         private static bool creationComplete(string fileName)
