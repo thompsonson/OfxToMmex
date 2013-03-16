@@ -49,7 +49,7 @@ namespace OfxToMmexConsoleApp
                     });
                     x.RunAsLocalSystem();                            
 
-                    x.SetDescription("OfxToMmex Importer");        
+                    x.SetDescription("Monitors folder for files with ofx data in them. Imports to specified Money Manager Ex database.");        
                     x.SetDisplayName("OfxToMmex");                       
                     x.SetServiceName("OfxToMmex");                       
                 });  
