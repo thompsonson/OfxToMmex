@@ -83,13 +83,13 @@ namespace OfxToMmexConsoleApp
     [PetaPoco.ExplicitColumns]
     public class Workflow
     {
-        [PetaPoco.Column] 
+        [PetaPoco.Column]
         public int WorkflowID { get; set; }
-        [PetaPoco.Column] 
+        [PetaPoco.Column]
         public string filename { get; set; }
-        [PetaPoco.Column] 
+        [PetaPoco.Column]
         public string Status { get; set; }
-        [PetaPoco.Column] 
+        [PetaPoco.Column]
         public string WatcherCreateTS { get; set; }
         [PetaPoco.Column]
         public string ImportStartTS { get; set; }
@@ -101,5 +101,20 @@ namespace OfxToMmexConsoleApp
         public string FinishTS { get; set; }
         [PetaPoco.Column]
         public string LogFile { get; set; }
+    }
+
+    [PetaPoco.TableName("OfxToMmexPayeeNameRegex")]
+    [PetaPoco.PrimaryKey("ID")]
+    [PetaPoco.ExplicitColumns]
+    public class PayeeRegex
+    {
+        [PetaPoco.Column]
+        public int ID { get; set; }
+        [PetaPoco.Column]
+        public string Regex { get; set; }
+        [PetaPoco.Column]
+        public int GroupIndex { get; set; }
+        [PetaPoco.Column]
+        public bool Active { get; set; }
     }
 }

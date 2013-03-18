@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OFXSharp;
-using System.IO;
-using System.Text.RegularExpressions;
 using log4net;
 using log4net.Config;
 using Topshelf;
@@ -59,7 +52,6 @@ namespace OfxToMmexConsoleApp
                 log.Fatal("Failed to start the service");
                 throw new OfxToMmexException("Failed to start the service", ex);
             }
-            Console.ReadLine();
         }
 
     }

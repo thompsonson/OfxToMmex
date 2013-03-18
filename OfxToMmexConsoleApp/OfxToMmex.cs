@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Nancy.Hosting.Self;
 
 namespace OfxToMmexConsoleApp
 {
@@ -15,6 +16,7 @@ namespace OfxToMmexConsoleApp
         public static string ProcessedPath { get; set; }
 
         private static readonly ILog log = LogManager.GetLogger(typeof(OfxToMmex));
+        private static NancyHost host;
 
         //public OfxToMmex() { }
 
@@ -43,6 +45,7 @@ namespace OfxToMmexConsoleApp
                 watcher.Path = MonitorPath;
                 //start the monitor
                 watcher.EnableRaisingEvents = true;
+
             }
             catch (Exception ex)
             {
@@ -50,11 +53,29 @@ namespace OfxToMmexConsoleApp
                 throw new OfxToMmexException("Failed to set up the folders and file system watcher", ex);
             }
             log.Info("Config loaded, watching folder (" + MonitorPath + ")... hit enter to quit");
+            try
+            {
+                // starting the Nancy host
+                log.Info("Starting the Nancy host");
+
+                // initialize an instance of NancyHost (found in the Nancy.Hosting.Self package)
+                string url = "http://localhost:8080";
+                host = new NancyHost(new Uri(url));
+                host.Start(); // start hosting
+
+                log.Info("Nancy started - url: "+ url);
+            }
+            catch (Exception ex)
+            {
+                log.Fatal("Failed to start the Nancy Self Hosted service");
+                throw new OfxToMmexException("Failed to start the Nancy Self Hosted service", ex);
+            }
 
         }
 
         public void Stop() {
             log.Info("Exiting...");
+            host.Stop();  // stop hosting
         }
 
         private static void ImportOfxToMmex(OFXDocument OfxDocument)
@@ -116,10 +137,13 @@ namespace OfxToMmexConsoleApp
                     if (transaction_count == 0)
                     {
                         log.Info("Inserting Transaction: " + trans.TransactionID);
-                        // get Payee ID and default Categories
+                        // get the payeeName
+                        string payeeName = processPayeeName(db, trans.Name);
+                        /*/ get Payee ID and default Categories
                         Regex re = new Regex(@"REF");
                         string[] arrPayee = re.Split(trans.Name);
                         string payeeName = arrPayee[0].Trim();
+                        //*/
                         log.Info("Checking for Payee: " + payeeName);
                         var payee = db.SingleOrDefault<Payee>("SELECT * FROM PAYEE_V1 WHERE PAYEENAME=@0", payeeName);
 
@@ -233,6 +257,28 @@ namespace OfxToMmexConsoleApp
             {
                 return false;
             }
+        }
+
+        private static string processPayeeName(PetaPoco.Database db, string payeeName)
+        {
+            // Show all Accounts    
+            foreach (var a in db.Query<PayeeRegex>("SELECT * FROM OfxToMmexPayeeNameRegex where Active=1 ;"))
+            {
+                log.Info(a.ID + " - " + a.Regex + " - " + a.GroupIndex );
+
+                // Here we call Regex.Match.
+                Match match = Regex.Match(payeeName, a.Regex, RegexOptions.IgnoreCase);
+
+                // Here we check the Match instance.
+                if (match.Success)
+                {
+                    // Finally, we get the Group value and display it.
+                    payeeName = match.Groups[a.GroupIndex].Value;
+                    log.Info("payeeName updated for regex: " + a.Regex + " to " + payeeName );
+                }
+            }
+
+            return payeeName.Trim();   
         }
 
     }
