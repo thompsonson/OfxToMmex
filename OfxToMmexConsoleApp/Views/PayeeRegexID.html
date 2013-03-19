@@ -5,8 +5,8 @@
 	</head>
 	<body>
 	
-      @Each
-    <form name="add-event" method="post" action="/payee/update">
+  @Each
+    <form name="add-event" method="post" action="/PayeeRegex/update">
       <input type="hidden" name="ID" value="@Current.ID" />
       <label>Regex: </label>
       <input type="text" name="Regex" value="@Current.Regex" />
@@ -22,21 +22,26 @@
 	@EndEach
 
     <table border="1">
-      <tr>
-        <th>Regex</th>
-        <th>Group Index</th>
-        <th>active</th>
-        <th>&nbsp;</th>
-        <th>&nbsp;</th>
-      </tr>
-      @Each
-      <tr>
-        <td>@Current.Regex</td>
-        <td>@Current.GroupIndex</td>
-        <td>@Current.Active</td>
-        <td><a href="/payee/@Current.ID">edit</a></td>
-        <td>delete</td>
-      </tr>
-      @EndEach
+    <tr>
+      <th>Regex</th>
+      <th>Group Index</th>
+      <th>active</th>
+      <th>&nbsp;</th>
+      <th>&nbsp;</th>
+    </tr>
+    @Each
+    <tr>
+      <td>@Current.Regex</td>
+      <td>@Current.GroupIndex</td>
+      <td>@Current.Active</td>
+      <td>
+        <a href="/PayeeRegex/@Current.ID">edit</a>
+      </td>
+      <td>
+        <a href="/PayeeRegex/delete/@Current.ID">delete</a>
+      </td>
+    </tr>
+    @EndEach
+  </table>
 	</body>
 </html>

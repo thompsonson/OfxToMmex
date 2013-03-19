@@ -5,7 +5,7 @@
 	</head>
 	<body>
 
-    <form name="add-event" method="post" action="/payee/add">
+    <form name="add-event" method="post" action="/PayeeRegex/add">
       <label>Regex: </label>
       <input type="text" name="Regex" />
       <br/>
@@ -31,8 +31,12 @@
         <td>@Current.Regex</td>
         <td>@Current.GroupIndex</td>
         <td>@Current.Active</td>
-        <td><a href="/payee/@Current.ID">edit</a></td>
-        <td>delete</td>
+        <td>
+          <a href="/PayeeRegex/@Current.ID">edit</a>
+        </td>
+        <td>
+          <a href="/PayeeRegex/delete/@Current.ID">delete</a>
+        </td>
       </tr>
       @EndEach
     </table>

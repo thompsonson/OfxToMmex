@@ -1,5 +1,6 @@
 ﻿using PetaPoco;
 using System.Collections.Generic;
+using System.Configuration;
 
 namespace OfxToMmexConsoleApp
 {
@@ -117,4 +118,37 @@ namespace OfxToMmexConsoleApp
         [PetaPoco.Column]
         public bool Active { get; set; }
     }
+
+    /* TODO: need to understand the mysteries of the config files first!
+     * //http://www.codeproject.com/Articles/19675/Cracking-the-Mysteries-of-NET-2-0-Configuration#t2_1
+    public class Config
+    {
+        public string mmex_db { 
+            get { return ConfigurationManager.ConnectionStrings["mmex_db"].ToString(); }
+            set
+            {
+                ConfigurationManager.ConnectionStrings.Remove("mmex_db");
+                ConfigurationManager.ConnectionStrings.Add(new System.Configuration.ConnectionStringSettings("mmex_db", value.ToString()));
+                //ConfigurationManager.Save();
+                //config.AppSettings.SectionInformation.ForceSave = true;
+                //config.Save(ConfigurationSaveMode.Modified);
+                //ConfigurationManager.RefreshSection("appSettings");
+            } 
+        }
+        public string Rootpath {
+            get { return ConfigurationManager.AppSettings["Rootpath"]; }
+            set {
+                ConfigurationManager.AppSettings["Rootpath"] = value;
+                //config.AppSettings.Settings.Remove("FTPHost");
+                //config.AppSettings.Settings.Add("FTPHost", tbFtpHost.Text);
+                //ConfigurationManager.AppSettings.SectionInformation.ForceSave = true;
+                var config= ConfigurationManager.OpenMappedExeConfiguration("test","test");
+                config.
+                ConfigurationManager.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+        public string log4net { get; set; }
+    }
+     * /*/
 }

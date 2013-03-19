@@ -88,10 +88,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Views\payee.html">
+    <Content Include="Views\PayeeRegex.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Views\payeeid.html">
+    <Content Include="Views\PayeeRegexID.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
