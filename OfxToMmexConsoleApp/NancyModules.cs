@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace OfxToMmexConsoleApp
 {
@@ -72,6 +73,13 @@ namespace OfxToMmexConsoleApp
                     // raise an exception
                 }
                 return Response.AsRedirect("/PayeeRegex");
+            };
+
+            Get["/Config"] = parameters =>
+            {
+                //ConfigurationManager.AppSettings.AllKeys;
+                
+                return "test";
             };
         }
     }
