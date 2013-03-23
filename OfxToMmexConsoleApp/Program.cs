@@ -46,6 +46,7 @@ namespace OfxToMmexConsoleApp
                     x.SetDisplayName("OfxToMmex");                       
                     x.SetServiceName("OfxToMmex");                       
                 });  
+
             }
             catch (Exception ex)
             {

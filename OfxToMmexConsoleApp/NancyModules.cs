@@ -31,10 +31,11 @@ namespace OfxToMmexConsoleApp
                 try{
                     db.Execute("DELETE FROM OfxToMmexPayeeNameRegex where ID=" + x.id + ";");
                 }
-                catch
+                catch (Exception ex)
                 {
                     log.Info("Failed to bind the posted details and insert into db");
                     // raise an exception
+                    throw new OfxToMmexException("Failed to bind the posted details and insert into db", ex);
                 }
                 return Response.AsRedirect("/PayeeRegex");
             };
@@ -52,10 +53,11 @@ namespace OfxToMmexConsoleApp
                     PayeeRegex p = this.Bind();
                     db.Insert(p);
                 }
-                catch
+                catch (Exception ex)
                 {
                     log.Info("Failed to bind the posted details and insert into db");
                     // raise an exception
+                    throw new OfxToMmexException("Failed to bind the posted details and insert into db", ex);
                 }
                 return Response.AsRedirect("/PayeeRegex");
             };
@@ -67,34 +69,39 @@ namespace OfxToMmexConsoleApp
                     PayeeRegex p = this.Bind();
                     db.Update(p);
                 }
-                catch
+                catch (Exception ex)
                 {
                     log.Info("Failed to bind the posted details and update into db");
                     // raise an exception
+                    throw new OfxToMmexException("Failed to bind the posted details and update into db", ex);
                 }
                 return Response.AsRedirect("/PayeeRegex");
             };
 
             Get["/Config"] = parameters =>
             {
-                //ConfigurationManager.AppSettings.AllKeys;
-                
-                return "test";
+                Config config = new Config();
+                return View["Views\\Config.html", config];
+            };
+
+            Post["/Config"] = parameters =>
+            {
+                try
+                {
+                    ConfigIntermediary config = new ConfigIntermediary();
+                    var tt = this.BindTo(config);
+                    Config.Rootpath = tt.Rootpath;
+                    Config.log4net = tt.log4net;
+                    Config.mmex_db = tt.mmex_db;
+                }
+                catch (Exception ex)
+                {
+                    log.Fatal("Failed to save the config details");
+                    // raise an exception
+                    throw new OfxToMmexException("Failed to save the config details", ex);
+                }
+                return Response.AsRedirect("/Config");
             };
         }
     }
-    /* 
-     *
-     *  config.AppSettings.Settings["FTPHost"].Value = tbFtpHost.Text;
-        config.AppSettings.Settings["FTPUserName"].Value = tbFtpUsername.Text;
-        config.AppSettings.Settings["FTPUserPasswd"].Value = tbFtpUserpasswd.Text;
-        config.AppSettings.Settings["FTPRemoteDir"].Value = tbFtpRemoteDir.Text;
-        config.AppSettings.Settings.Remove("FTPHost");
-        config.AppSettings.Settings.Add("FTPHost", tbFtpHost.Text);
-        config.AppSettings.SectionInformation.ForceSave = true;
-        config.Save(ConfigurationSaveMode.Modified);
-        ConfigurationManager.RefreshSection("appSettings");
-
-        http://www.daniweb.com/software-development/csharp/threads/245308/writingupdating-app.config
-     */
 }

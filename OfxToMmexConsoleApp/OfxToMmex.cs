@@ -15,21 +15,38 @@ namespace OfxToMmexConsoleApp
         public static string ProcessingPath { get; set; }
         public static string ProcessedPath { get; set; }
 
+        private static FileSystemWatcher watcher;
         private static readonly ILog log = LogManager.GetLogger(typeof(OfxToMmex));
         private static NancyHost host;
 
-        //public OfxToMmex() { }
-
-        public void Start()
+        public static void ChangeWatchingFolder()
+        {
+            RootPath = Config.Rootpath;
+            log.Info("Changing the path to watch to " + RootPath);
+            MonitorPath = System.IO.Path.Combine(RootPath, "Monitor");
+            ProcessingPath = System.IO.Path.Combine(RootPath, "Processing");
+            ProcessedPath = System.IO.Path.Combine(RootPath, "Processed");
+            // check the folder exists
+            if (!System.IO.File.Exists(RootPath))
+                System.IO.Directory.CreateDirectory(RootPath);
+            if (!System.IO.File.Exists(MonitorPath))
+                System.IO.Directory.CreateDirectory(MonitorPath);
+            if (!System.IO.File.Exists(ProcessingPath))
+                System.IO.Directory.CreateDirectory(ProcessingPath);
+            if (!System.IO.File.Exists(ProcessedPath))
+                System.IO.Directory.CreateDirectory(ProcessedPath);
+            watcher.Path = MonitorPath;
+        }
+        public static void StartWatchingFolder()
         {
             try
             {
                 log.Info("Setting up folders and file system watcher");
                 //create a filesystemwatcher class instance for monitoring a physical file system directory
-                FileSystemWatcher watcher = new FileSystemWatcher();
+                watcher = new FileSystemWatcher();
                 watcher.Created += new FileSystemEventHandler(watcher_Created);
                 //provide a path to instance for monitoring
-                RootPath = System.Configuration.ConfigurationManager.AppSettings["RootPath"];
+                RootPath = Config.Rootpath;
                 MonitorPath = System.IO.Path.Combine(RootPath, "Monitor");
                 ProcessingPath = System.IO.Path.Combine(RootPath, "Processing");
                 ProcessedPath = System.IO.Path.Combine(RootPath, "Processed");
@@ -52,6 +69,13 @@ namespace OfxToMmexConsoleApp
                 log.Fatal("Failed to set up the folders and file system watcher");
                 throw new OfxToMmexException("Failed to set up the folders and file system watcher", ex);
             }
+        }
+
+        public void Start()
+        {
+            
+            StartWatchingFolder();
+
             log.Info("Config loaded, watching folder (" + MonitorPath + ")... hit enter to quit");
             try
             {
@@ -63,7 +87,9 @@ namespace OfxToMmexConsoleApp
                 host = new NancyHost(new Uri(url));
                 host.Start(); // start hosting
 
-                log.Info("Nancy started - url: "+ url);
+                log.Info("Nancy started - url: " + url);
+
+                //Config.Rootpath = "d:\\temp\\ofxtommex";
             }
             catch (Exception ex)
             {

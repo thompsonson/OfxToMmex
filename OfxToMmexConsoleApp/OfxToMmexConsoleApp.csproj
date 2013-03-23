@@ -60,6 +60,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="NancyModules.cs" />
     <Compile Include="OfxToMmex.cs" />
@@ -88,6 +89,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="Views\Config.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Views\PayeeRegex.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
