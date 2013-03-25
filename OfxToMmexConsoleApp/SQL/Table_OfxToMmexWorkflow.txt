@@ -1,0 +1,13 @@
+﻿
+CREATE TABLE OfxToMmexWorkflow(
+        WorkflowID INTEGER PRIMARY KEY,
+                filename STRING,
+        Status STRING,
+        WatcherCreateTS  STRING,
+        ImportStartTS  STRING,
+        ProcessStartTS STRING,
+        DBInsertStartTS  STRING,
+        FinishTS         STRING,
+        LogFile  STRING
+);
+
