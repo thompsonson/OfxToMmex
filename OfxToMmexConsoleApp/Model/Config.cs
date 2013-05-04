@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Configuration;
 using System.Xml;
-using System.Data.SqlClient;
 
-namespace OfxToMmexConsoleApp
+namespace OfxToMmex.Model
 {
     public class ConfigIntermediary
     {
@@ -63,7 +58,7 @@ namespace OfxToMmexConsoleApp
             {
                 UpdateSetting("Rootpath", value);
                 // stop and start the file watcher
-                OfxToMmex.ChangeWatchingFolder();
+                App.Service.ChangeWatchingFolder();
             }
         }
         public static string log4net

@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using log4net;
 
-namespace OfxToMmexConsoleApp
+namespace OfxToMmex
 {
     [Serializable]
     class OfxToMmexException : Exception

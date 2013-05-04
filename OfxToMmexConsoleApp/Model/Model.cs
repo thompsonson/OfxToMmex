@@ -1,8 +1,5 @@
-﻿using PetaPoco;
-using System.Collections.Generic;
-using System.Configuration;
-
-namespace OfxToMmexConsoleApp
+﻿
+namespace OfxToMmex.Model
 {
     [PetaPoco.TableName("ACCOUNTLIST_V1")]
     [PetaPoco.PrimaryKey("ACCOUNTID")]

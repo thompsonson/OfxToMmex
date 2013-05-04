@@ -3,7 +3,7 @@ using log4net;
 using log4net.Config;
 using Topshelf;
 
-namespace OfxToMmexConsoleApp
+namespace OfxToMmex
 {
     class Program
     {
@@ -23,7 +23,7 @@ namespace OfxToMmexConsoleApp
             }
             catch (Exception ex)
             {
-                throw new OfxToMmexException("Failed to set up log4net", ex);
+                throw new OfxToMmex.OfxToMmexException("Failed to set up log4net", ex);
             }
             log.Info("log4net config loaded - starting the service");
             try
@@ -34,9 +34,9 @@ namespace OfxToMmexConsoleApp
                 HostFactory.Run(x =>                                 
                 {
                     x.UseLog4Net(log4netConfigPath);
-                    x.Service<OfxToMmex>(s =>                        
+                    x.Service<App.Service>(s =>                        
                     {
-                        s.ConstructUsing(name => new OfxToMmex());
+                        s.ConstructUsing(name => new App.Service());
                         s.WhenStarted(OfxToMmex => OfxToMmex.Start());
                         s.WhenStopped(OfxToMmex => OfxToMmex.Stop());
                     });
@@ -51,7 +51,7 @@ namespace OfxToMmexConsoleApp
             catch (Exception ex)
             {
                 log.Fatal("Failed to start the service");
-                throw new OfxToMmexException("Failed to start the service", ex);
+                throw new OfxToMmex.OfxToMmexException("Failed to start the service", ex);
             }
         }
 

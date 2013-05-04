@@ -1,14 +1,14 @@
 ﻿using log4net;
+using Nancy.Hosting.Self;
 using OFXSharp;
 using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Nancy.Hosting.Self;
 
-namespace OfxToMmexConsoleApp
+namespace OfxToMmex.App
 {
-    public class OfxToMmex
+    public class Service
     {
         public static string RootPath { get; set; }
         public static string MonitorPath { get; set; }
@@ -16,12 +16,12 @@ namespace OfxToMmexConsoleApp
         public static string ProcessedPath { get; set; }
 
         private static FileSystemWatcher watcher;
-        private static readonly ILog log = LogManager.GetLogger(typeof(OfxToMmex));
+        private static readonly ILog log = LogManager.GetLogger(typeof(Service));
         private static NancyHost host;
 
         public static void ChangeWatchingFolder()
         {
-            RootPath = Config.Rootpath;
+            RootPath = Model.Config.Rootpath;
             log.Info("Changing the path to watch to " + RootPath);
             MonitorPath = System.IO.Path.Combine(RootPath, "Monitor");
             ProcessingPath = System.IO.Path.Combine(RootPath, "Processing");
@@ -46,7 +46,7 @@ namespace OfxToMmexConsoleApp
                 watcher = new FileSystemWatcher();
                 watcher.Created += new FileSystemEventHandler(watcher_Created);
                 //provide a path to instance for monitoring
-                RootPath = Config.Rootpath;
+                RootPath = Model.Config.Rootpath;
                 MonitorPath = System.IO.Path.Combine(RootPath, "Monitor");
                 ProcessingPath = System.IO.Path.Combine(RootPath, "Processing");
                 ProcessedPath = System.IO.Path.Combine(RootPath, "Processed");
@@ -67,7 +67,7 @@ namespace OfxToMmexConsoleApp
             catch (Exception ex)
             {
                 log.Fatal("Failed to set up the folders and file system watcher");
-                throw new OfxToMmexException("Failed to set up the folders and file system watcher", ex);
+                throw new OfxToMmex.OfxToMmexException("Failed to set up the folders and file system watcher", ex);
             }
         }
 
@@ -94,7 +94,7 @@ namespace OfxToMmexConsoleApp
             catch (Exception ex)
             {
                 log.Fatal("Failed to start the Nancy Self Hosted service");
-                throw new OfxToMmexException("Failed to start the Nancy Self Hosted service", ex);
+                throw new OfxToMmex.OfxToMmexException("Failed to start the Nancy Self Hosted service", ex);
             }
 
         }
@@ -111,7 +111,7 @@ namespace OfxToMmexConsoleApp
             log.Info("PetPoco DB started");
 
             // Show all Accounts    
-            foreach (var a in db.Query<Accounts>("SELECT * FROM ACCOUNTLIST_V1;"))
+            foreach (var a in db.Query<Model.Accounts>("SELECT * FROM ACCOUNTLIST_V1;"))
             {
                 log.Info(a.ACCOUNTID + " - " + a.ACCOUNTNUM + " - " + a.ACCOUNTNAME);
             }
@@ -124,18 +124,18 @@ namespace OfxToMmexConsoleApp
             {
                 log.Info("Account # " + ofxstatment.Account.AccountID);
 
-                var account = db.SingleOrDefault<Accounts>("SELECT * FROM ACCOUNTLIST_V1 WHERE ACCOUNTNUM=@0", ofxstatment.Account.AccountID);
+                var account = db.SingleOrDefault<Model.Accounts>("SELECT * FROM ACCOUNTLIST_V1 WHERE ACCOUNTNUM=@0", ofxstatment.Account.AccountID);
                 if (account == null)
                 {
                     log.Info("Creating the account");
                     //get the currency ID
-                    var currency = db.SingleOrDefault<Currencies>("SELECT * FROM CURRENCYFORMATS_V1 WHERE CURRENCY_SYMBOL=@0", ofxstatment.Currency); //(CURRENCY_SYMBOL: document.CURDEF);
+                    var currency = db.SingleOrDefault<Model.Currencies>("SELECT * FROM CURRENCYFORMATS_V1 WHERE CURRENCY_SYMBOL=@0", ofxstatment.Currency); //(CURRENCY_SYMBOL: document.CURDEF);
                     // defaulting to GBP if no currency
                     int currency_id = 6;
                     if (currency != null)
                         currency_id = currency.CURRENCYID;
                     // create the account 
-                    account = new Accounts();
+                    account = new Model.Accounts();
                     account.ACCOUNTNUM = ofxstatment.Account.AccountID;
                     if (ofxstatment.Account.AccountType == OFXSharp.AccountType.BANK)
                     {
@@ -159,25 +159,25 @@ namespace OfxToMmexConsoleApp
                 {
                     // check if the transaction is already present
                     log.Info("Checking for Transaction: " + trans.TransactionID);
-                    var transaction_count = db.SingleOrDefault<long>("SELECT count(*) FROM CHECKINGACCOUNT_V1 WHERE FITID=@0", trans.TransactionID);
+                    var transaction_count = db.SingleOrDefault<long>("SELECT count(*) FROM CHECKINGACCOUNT_V1 WHERE FITID=@0 AND ACCOUNTID=@1", trans.TransactionID, account.ACCOUNTID);
                     if (transaction_count == 0)
                     {
                         log.Info("Inserting Transaction: " + trans.TransactionID);
                         // get the payeeName
-                        string payeeName = processPayeeName(db, trans.Name);
+                        string payeeName = ProcessPayee.processAll(db, trans.Name);
                         /*/ get Payee ID and default Categories
                         Regex re = new Regex(@"REF");
                         string[] arrPayee = re.Split(trans.Name);
                         string payeeName = arrPayee[0].Trim();
                         //*/
                         log.Info("Checking for Payee: " + payeeName);
-                        var payee = db.SingleOrDefault<Payee>("SELECT * FROM PAYEE_V1 WHERE PAYEENAME=@0", payeeName);
+                        var payee = db.SingleOrDefault<Model.Payee>("SELECT * FROM PAYEE_V1 WHERE PAYEENAME=@0", payeeName);
 
                         if (payee == null)
                         {
                             log.Info("Inserting Payee: " + payeeName);
                             // create the payee
-                            payee = new Payee();
+                            payee = new Model.Payee();
                             payee.PAYEENAME = payeeName;
                             payee.CATEGID = -1;
                             payee.SUBCATEGID = -1;
@@ -185,7 +185,7 @@ namespace OfxToMmexConsoleApp
                             db.Insert(payee);
                         }
 
-                        var newTrans = new Transactions();
+                        var newTrans = new Model.Transactions();
                         newTrans.ACCOUNTID = account.ACCOUNTID;
                         newTrans.PAYEEID = payee.PAYEEID;
                         if (trans.Amount > 0)
@@ -216,7 +216,7 @@ namespace OfxToMmexConsoleApp
 
             }
             // Show all Accounts    
-            foreach (var a in db.Query<Accounts>("SELECT * FROM ACCOUNTLIST_V1;"))
+            foreach (var a in db.Query<Model.Accounts>("SELECT * FROM ACCOUNTLIST_V1;"))
             {
                 log.Info(a.ACCOUNTID + " - " + a.ACCOUNTNUM + " - " + a.ACCOUNTNAME);
             }
@@ -230,7 +230,7 @@ namespace OfxToMmexConsoleApp
                 var db = new PetaPoco.Database("mmex_db");
                 //fullpath
                 log.Info("Importing file: " + e.FullPath);
-                Workflow wf = new Workflow();
+                Model.Workflow wf = new Model.Workflow();
                 wf.filename = e.FullPath;
                 wf.WatcherCreateTS = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 db.Insert(wf);
@@ -265,7 +265,7 @@ namespace OfxToMmexConsoleApp
             catch (Exception ex)
             {
                 log.Fatal("Failed whilst processing the file");
-                throw new OfxToMmexException("Failed whilst processing the file", ex);
+                throw new OfxToMmex.OfxToMmexException("Failed whilst processing the file", ex);
             }
         }
 
@@ -283,28 +283,6 @@ namespace OfxToMmexConsoleApp
             {
                 return false;
             }
-        }
-
-        private static string processPayeeName(PetaPoco.Database db, string payeeName)
-        {
-            // Show all Accounts    
-            foreach (var a in db.Query<PayeeRegex>("SELECT * FROM OfxToMmexPayeeNameRegex where Active=1 ;"))
-            {
-                log.Info(a.ID + " - " + a.Regex + " - " + a.GroupIndex );
-
-                // Here we call Regex.Match.
-                Match match = Regex.Match(payeeName, a.Regex, RegexOptions.IgnoreCase);
-
-                // Here we check the Match instance.
-                if (match.Success)
-                {
-                    // Finally, we get the Group value and display it.
-                    payeeName = match.Groups[a.GroupIndex].Value;
-                    log.Info("payeeName updated for regex: " + a.Regex + " to " + payeeName );
-                }
-            }
-
-            return payeeName.Trim();   
         }
 
     }
