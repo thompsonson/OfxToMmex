@@ -15,6 +15,7 @@ Project to parse [OFX] (http://www.ofx.net/) files and import into [Money Manage
 **Please note that it requires a small change to the DB schema**
 
 > sqlite3 Test.mmb "ALTER TABLE CHECKINGACCOUNT_V1 ADD COLUMN FITID STRING;"
+
 > sqlite3 Test.mmb "CREATE TABLE OfxToMmexPayeeNameRegex(ID INTEGER PRIMARY KEY,regex STRING,GroupIndex INTEGER, Active INTEGER);"
 
 The FITID column is used to ensure a transaction is imported just once (each FITID is unique to the account)
@@ -22,8 +23,15 @@ The FITID column is used to ensure a transaction is imported just once (each FIT
 # Config 
 
 edit __OfxToMmexConsoleApp.exe.config__ change the following two entries:
-> <add name="mmex_db" connectionString="Data Source=./Test.mmb;" providerName="Mono.Data.SQLite"/> 
-> <add key="log4net" value="./log4net.config"></add>
+
+```
+ <add name="mmex_db" connectionString="Data Source=./Test.mmb;" providerName="Mono.Data.SQLite"/> 
+```
+
+```
+ <add key="log4net" value="./log4net.config"></add>
+```
+
 to point at your MMEX DB file and where the log4net.config is, it's the same folder as the exe.
 
 # Importing the ofx statement
@@ -51,8 +59,6 @@ This in now for MMEX in general (see footnote)...
 ## small footnote
 
 I've changed this a bit from when I first put it together. Then I was on a windows only environment and very intersted in self contained services. Since then I only use windows at work (Windows 7 laptop broke and was replaced with Mac Air, as you do... :)). So I've finally got around to moving it to Mono and had to change the architecture a bit. I currently think this is good, if I make smaller components to do what I want there's less bloat and easier to hack each one!
-
-
 
 
 
