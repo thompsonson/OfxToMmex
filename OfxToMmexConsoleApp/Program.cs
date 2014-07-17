@@ -24,14 +24,39 @@ namespace OfxToMmex
             {
                 throw new OfxToMmex.OfxToMmexException("Failed to set up log4net", ex);
             }
-            log.Info("log4net config loaded - starting the service");
-        	
-			log.Info("Processing ofx file " + args [0]);
+            log.Info("log4net config loaded - checking the DB");
+
+			CheckDatabase();
+
+			log.Info ("DB good - processing file" + args[0]);
 
 			OfxToMmex.App.CmdLine.processFile(args[0]);
 			//OfxToMmex.App.CmdLine.processFile("/Users/matt/Downloads/data-1.ofx");
 		
         }
+
+
+		private static void CheckDatabase()
+		{
+			var db = new PetaPoco.Database("mmex_db");
+			String sql = @"
+CREATE TABLE IF NOT EXISTS OfxToMmexPayeeNameRegex(
+        ID INTEGER PRIMARY KEY,
+        regex STRING,
+        GroupIndex INTEGER,
+		Active INTEGER);";
+
+			db.Execute(sql);
+
+			sql = "ALTER TABLE CHECKINGACCOUNT_V1 ADD COLUMN FITID STRING;";
+			try {
+
+				db.Execute(sql);
+			} catch {
+				log.Info ("Catching this error as it'll fail all but the first time... naughty i know!");
+			}
+		}
+
 
     }
 }
