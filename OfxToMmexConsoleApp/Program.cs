@@ -1,7 +1,6 @@
 ﻿using System;
 using log4net;
 using log4net.Config;
-using Topshelf;
 
 namespace OfxToMmex
 {
@@ -26,33 +25,12 @@ namespace OfxToMmex
                 throw new OfxToMmex.OfxToMmexException("Failed to set up log4net", ex);
             }
             log.Info("log4net config loaded - starting the service");
-            try
-            {
-                // get things moving
-                //OfxToMmex.Start();
+        	
+			log.Info("Processing ofx file " + args [0]);
 
-                HostFactory.Run(x =>                                 
-                {
-                    x.UseLog4Net(log4netConfigPath);
-                    x.Service<App.Service>(s =>                        
-                    {
-                        s.ConstructUsing(name => new App.Service());
-                        s.WhenStarted(OfxToMmex => OfxToMmex.Start());
-                        s.WhenStopped(OfxToMmex => OfxToMmex.Stop());
-                    });
-                    x.RunAsLocalSystem();                            
-
-                    x.SetDescription("Monitors folder for files with ofx data in them. Imports to specified Money Manager Ex database.");        
-                    x.SetDisplayName("OfxToMmex");                       
-                    x.SetServiceName("OfxToMmex");                       
-                });  
-
-            }
-            catch (Exception ex)
-            {
-                log.Fatal("Failed to start the service");
-                throw new OfxToMmex.OfxToMmexException("Failed to start the service", ex);
-            }
+			OfxToMmex.App.CmdLine.processFile(args[0]);
+			//OfxToMmex.App.CmdLine.processFile("/Users/matt/Downloads/data-1.ofx");
+		
         }
 
     }

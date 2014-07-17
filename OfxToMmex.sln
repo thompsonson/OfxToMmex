@@ -1,13 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Desktop
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OfxToMmexConsoleApp", "OfxToMmexConsoleApp\OfxToMmexConsoleApp.csproj", "{69AE82B6-3A53-42FA-B673-CBA153A66226}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OFXSharp", "..\OFXSharp\OFXSharp\OFXSharp.csproj", "{7BBA813D-EE93-491A-B0C7-FBD588E393CB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MmexOrganisePayees", "..\MmexOrganisePayees\MmexOrganisePayees\MmexOrganisePayees.csproj", "{B19E6388-301B-468E-80E6-3097765573F6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject", "UnitTestProject\UnitTestProject.csproj", "{E9563C7D-6CAA-4A74-8808-FDA4DD3BF449}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,14 +19,9 @@ Global
 		{7BBA813D-EE93-491A-B0C7-FBD588E393CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BBA813D-EE93-491A-B0C7-FBD588E393CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BBA813D-EE93-491A-B0C7-FBD588E393CB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B19E6388-301B-468E-80E6-3097765573F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B19E6388-301B-468E-80E6-3097765573F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B19E6388-301B-468E-80E6-3097765573F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B19E6388-301B-468E-80E6-3097765573F6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E9563C7D-6CAA-4A74-8808-FDA4DD3BF449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E9563C7D-6CAA-4A74-8808-FDA4DD3BF449}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E9563C7D-6CAA-4A74-8808-FDA4DD3BF449}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E9563C7D-6CAA-4A74-8808-FDA4DD3BF449}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = OfxToMmexConsoleApp\OfxToMmexConsoleApp.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

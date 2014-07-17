@@ -3,3 +3,5 @@
         regex STRING,
         GroupIndex INTEGER
 , Active INTEGER);
+
+        CREATE TABLE OfxToMmexPayeeNameRegex(        ID INTEGER PRIMARY KEY,        regex STRING,        GroupIndex INTEGER, Active INTEGER);

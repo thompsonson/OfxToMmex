@@ -36,12 +36,6 @@
       <HintPath>..\packages\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Nancy">
-      <HintPath>..\packages\Nancy.0.16.1\lib\net40\Nancy.dll</HintPath>
-    </Reference>
-    <Reference Include="Nancy.Hosting.Self">
-      <HintPath>..\packages\Nancy.Hosting.Self.0.16.1\lib\net40\Nancy.Hosting.Self.dll</HintPath>
-    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\packages\ServiceStack.Text.3.9.38\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
@@ -53,25 +47,17 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Topshelf">
-      <HintPath>..\packages\TopShelf.3.1.0\lib\net40-full\Topshelf.dll</HintPath>
-    </Reference>
-    <Reference Include="Topshelf.Log4Net">
-      <HintPath>..\packages\Topshelf.Log4Net.3.1.0\lib\net40-full\Topshelf.Log4Net.dll</HintPath>
-    </Reference>
+    <Reference Include="Mono.Data.Sqlite" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\ProcessPayee.cs" />
     <Compile Include="Model\Config.cs" />
-    <Compile Include="Model\Loan.cs" />
     <Compile Include="Model\Model.cs" />
-    <Compile Include="Controllers\Config.cs" />
-    <Compile Include="App\Service.cs" />
     <Compile Include="OfxToMmexException.cs" />
     <Compile Include="Model\PetaPoco.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Controllers\PayeeRegex.cs" />
+    <Compile Include="App\CmdLine.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -87,7 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\OFXSharp\OFXSharp\OFXSharp.csproj">
-      <Project>{7bba813d-ee93-491a-b0c7-fbd588e393cb}</Project>
+      <Project>{7BBA813D-EE93-491A-B0C7-FBD588E393CB}</Project>
       <Name>OFXSharp</Name>
     </ProjectReference>
   </ItemGroup>
@@ -99,16 +85,6 @@
     <Content Include="SQL\Table_StockPrice.txt" />
     <Content Include="SQL\Trigger_StockPrice_Update.txt" />
     <Content Include="SQL\Trigger_StockPrice_Insert.txt" />
-    <Content Include="Views\Config.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\PayeeRegex.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Views\PayeeRegexID.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

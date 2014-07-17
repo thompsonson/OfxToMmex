@@ -7,7 +7,6 @@ namespace OfxToMmex.Model
     public class ConfigIntermediary
     {
         public string mmex_db { get; set; }
-        public string Rootpath { get; set; }
         public string log4net{ get; set; }
     }
 
@@ -47,19 +46,6 @@ namespace OfxToMmex.Model
             {
                 UpdateConnectionString("mmex_db", value);
             } 
-        }
-        public static string Rootpath
-        {
-            get 
-            {
-                return ConfigurationManager.AppSettings["Rootpath"]; 
-            }
-            set 
-            {
-                UpdateSetting("Rootpath", value);
-                // stop and start the file watcher
-                App.Service.ChangeWatchingFolder();
-            }
         }
         public static string log4net
         {

@@ -1,5 +1,4 @@
 ﻿using log4net;
-using Nancy.Hosting.Self;
 using OFXSharp;
 using System;
 using System.IO;
